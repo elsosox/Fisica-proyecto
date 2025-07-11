@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>🧠 Juego de Preguntas</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .juego-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      color: #222;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .pregunta-texto {
+      font-size: 20px;
+      margin-bottom: 25px;
+    }
+
+    .opciones li {
+      margin: 10px 0;
+    }
+
+    .opciones button {
+      width: 100%;
+      padding: 15px;
+      background: #e0f7fa;
+      border: 2px solid #00acc1;
+      color: #004d40;
+      font-size: 18px;
+      border-radius: 10px;
+      transition: 0.3s ease;
+    }
+
+    .opciones button:hover {
+      background: #00bcd4;
+      color: #fff;
+    }
+
+    .resultado {
+      font-size: 22px;
+      margin-top: 20px;
+    }
+
+    .solucionario-btn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 18px;
+      background: #4caf50;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .solucionario-btn:hover {
+      background: #43a047;
+    }
+
+    .volver-btn {
+      background: #9c27b0;
+      margin-top: 30px;
+      padding: 12px 20px;
+      font-size: 17px;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="juego" class="juego-container"></div>
+
+  <script>
+    let preguntas = {{ preguntas | tojson }};
+    let respuestas = [];
+    let actual = 0;
+
+    function mostrarPregunta() {
+      const q = preguntas[actual];
+      document.getElementById("juego").innerHTML = `
+        <h2>🧩 Pregunta ${actual + 1} de ${preguntas.length}</h2>
+        <p class="pregunta-texto">${q.question}</p>
+        <ul class="opciones">
+          ${q.options.map((op, i) => `
+            <li><button onclick="responder(${i})">${String.fromCharCode(65 + i)}. ${op}</button></li>
+          `).join("")}
+        </ul>
+      `;
+    }
+
+    function responder(i) {
+      respuestas.push(i);
+      actual++;
+      if (actual < preguntas.length) {
+        mostrarPregunta();
+      } else {
+        mostrarResultado();
+      }
+    }
+
+    function mostrarResultado() {
+      let correctas = preguntas.filter((p, i) => respuestas[i] === p.correctIndex).length;
+      document.getElementById("juego").innerHTML = `
+        <h2>🎉 ¡Juego Terminado!</h2>
+        <p class="resultado">Has acertado <strong>${correctas}</strong> de <strong>${preguntas.length}</strong> preguntas.</p>
+        <button class="solucionario-btn" onclick="verSolucionario()">📘 Ver Solucionario</button>
+      `;
+    }
+
+    function verSolucionario() {
+      document.getElementById("juego").innerHTML = `<h2>📘 Solucionario</h2>`;
+      preguntas.forEach((p, i) => {
+        const user = respuestas[i];
+        const esCorrecta = user === p.correctIndex;
+        const color = esCorrecta ? "green" : "red";
+        document.getElementById("juego").innerHTML += `
+          <div style="border:2px solid ${color};border-radius:12px;padding:15px;margin:15px 0;background:#f9f9f9;">
+            <p><strong>Pregunta ${i + 1}:</strong><br>${p.question}</p>
+            <ul>
+              ${p.options.map((op, idx) => `
+                <li style="${idx === p.correctIndex ? 'font-weight:bold;color:green;' : ''}">
+                  ${String.fromCharCode(65 + idx)}. ${op}
+                </li>
+              `).join("")}
+            </ul>
+            <p><strong>Tu respuesta:</strong> ${String.fromCharCode(65 + user)} (${esCorrecta ? '✔ Correcta' : '❌ Incorrecta'})</p>
+            <p><strong>Solución:</strong><br>${p.solution}</p>
+          </div>
+        `;
+      });
+
+      document.getElementById("juego").innerHTML += `
+        <button class="volver-btn" onclick="window.location.href='/'">🏠 Volver al Inicio</button>
+      `;
+    }
+
+    window.onload = mostrarPregunta;
+  </script>
+</body>
+</html>
