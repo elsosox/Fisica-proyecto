@@ -1,4 +1,7 @@
-"scripts": {
-  "build": "npm run build",
-  "start": "npm start"
-}
+{
+    "name": "fisica-proyecto",
+    "version": "1.0.0",
+    "scripts": {
+      "build": ""
+    }
+  }
