@@ -1,7 +1,11 @@
+
 {
-    "name": "fisica-proyecto",
-    "version": "1.0.0",
-    "scripts": {
-      "build": ""
-    }
+    "version": 2,
+    "builds": [
+      { "src": "app.py", "use": "@vercel/python" },
+      { "src": "static/**/*", "use": "@vercel/static" }
+    ],
+    "routes": [
+      { "src": "/(.*)", "dest": "/app.py" }
+    ]
   }
